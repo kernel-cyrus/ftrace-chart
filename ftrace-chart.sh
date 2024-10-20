@@ -28,7 +28,7 @@ if [ -z "$1" ] || [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
     echo "  $ ./ftrace-chart.sh report ./ftrace-chart.data/trace.txt"
     echo ""
     echo "  3. Generate svg image for plantuml"
-    echo "  $ java -jar plantuml-mit.jar -tsvg schedule~0.puml"
+    echo "  $ java -jar plantuml-mit.jar -tsvg ./ftrace-chart.data/schedule~1.puml"
     echo ""
 
 # Record Mode
