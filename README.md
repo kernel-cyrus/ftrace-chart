@@ -26,3 +26,7 @@ Examples:
   3. Generate svg image for plantuml
   $ java -jar plantuml-mit.jar -tsvg ./ftrace-chart.data/schedule~1.puml
 ```
+
+## Screen Shots
+
+![schedule.svg](schedule.svg)
