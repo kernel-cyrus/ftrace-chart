@@ -50,7 +50,7 @@ if [ -z "$1" ] || [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
     echo "  $ ./ftrace-chart.sh report --mode=trace ./ftrace-chart.data/trace.txt"
     echo ""
     echo "  3. Generate plantuml svg image"
-    echo "  $ java -jar plantuml-mit.jar -tsvg ./ftrace-chart.data/schedule.puml"
+    echo "  $ java -jar plantuml-mit.jar -tsvg ./ftrace-chart.data/schedule~0.puml"
     echo ""
     echo "Stack Mode Example"
     echo "---------------------"
