@@ -33,7 +33,7 @@ Trace Mode Example
   $ ./ftrace-chart.sh report --mode=trace ./ftrace-chart.data/trace.txt
 
   3. Generate plantuml svg image
-  $ java -jar plantuml-mit.jar -tsvg ./ftrace-chart.data/schedule~1.puml
+  $ java -jar plantuml-mit.jar -tsvg ./ftrace-chart.data/schedule~0.puml
 
 Stack Mode Example
 ---------------------
