@@ -5,7 +5,7 @@ start_trace() {
     TRACE_FILE=$1
     echo "$TRACE_FILE"
     echo "Start tracing..."
-    echo 1 > /sys/kernel/debug/tracing/tracing_on
+    echo -n 1 > /sys/kernel/debug/tracing/tracing_on
     set +e
     if [ -z "$TIME" ]; then
         trap 'echo ""' SIGINT
@@ -17,7 +17,7 @@ start_trace() {
     fi
     set -e
     echo "Stop tracing..."
-    echo 0 > /sys/kernel/debug/tracing/tracing_on
+    echo -n 0 > /sys/kernel/debug/tracing/tracing_on
 }
 
 # Help
@@ -50,7 +50,7 @@ if [ -z "$1" ] || [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
     echo "  $ ./ftrace-chart.sh report --mode=trace ./ftrace-chart.data/trace.txt"
     echo ""
     echo "  3. Generate plantuml svg image"
-    echo "  $ java -jar plantuml-mit.jar -tsvg ./ftrace-chart.data/schedule~0.puml"
+    echo "  $ java -jar plantuml-mit.jar -tsvg ./ftrace-chart.data/schedule~1.puml"
     echo ""
     echo "Stack Mode Example"
     echo "---------------------"
@@ -129,34 +129,34 @@ elif [ "$1" == "record" ]; then
     if [ "$MODE" == "trace" ]; then
         
         echo "Setting up ftrace..."
-        echo 0 > /sys/kernel/debug/tracing/tracing_on
-        echo function_graph > /sys/kernel/debug/tracing/current_tracer
-        echo > /sys/kernel/debug/tracing/trace
-        echo > /sys/kernel/debug/tracing/set_graph_function
-        echo "$FUNC" > /sys/kernel/debug/tracing/set_graph_function
+        echo -n 0 > /sys/kernel/debug/tracing/tracing_on
+        echo -n function_graph > /sys/kernel/debug/tracing/current_tracer
+        echo -n > /sys/kernel/debug/tracing/trace
+        echo -n > /sys/kernel/debug/tracing/set_graph_function
+        echo -n "$FUNC" > /sys/kernel/debug/tracing/set_graph_function
         start_trace $OUT_FILE
-        echo 0 > /sys/kernel/debug/tracing/tracing_on
-        echo > /sys/kernel/debug/tracing/set_graph_function
+        echo -n 0 > /sys/kernel/debug/tracing/tracing_on
+        echo -n > /sys/kernel/debug/tracing/set_graph_function
         echo "Done. ($OUT_FILE)"
 
     # Record Stack Mode
     elif [ "$MODE" == "stack" ]; then
 
         echo "Setting up ftrace..."
-        echo 0 > /sys/kernel/debug/tracing/tracing_on
-        echo nop > /sys/kernel/debug/tracing/current_tracer
-        echo > /sys/kernel/debug/tracing/trace
+        echo -n 0 > /sys/kernel/debug/tracing/tracing_on
+        echo -n nop > /sys/kernel/debug/tracing/current_tracer
+        echo -n > /sys/kernel/debug/tracing/trace
         if [ -d "/sys/kernel/debug/tracing/events/kprobes" ]; then
-            echo 0 > /sys/kernel/debug/tracing/events/kprobes/enable
+            echo -n 0 > /sys/kernel/debug/tracing/events/kprobes/enable
         fi
         echo > /sys/kernel/debug/tracing/kprobe_events
-        echo "p:$FUNC $FUNC" > /sys/kernel/debug/tracing/kprobe_events
-        echo 1 > /sys/kernel/debug/tracing/events/kprobes/enable
-        echo 1 > /sys/kernel/debug/tracing/options/stacktrace
+        echo -n "p:$FUNC $FUNC" > /sys/kernel/debug/tracing/kprobe_events
+        echo -n 1 > /sys/kernel/debug/tracing/events/kprobes/enable
+        echo -n 1 > /sys/kernel/debug/tracing/options/stacktrace
         start_trace $OUT_FILE
-        echo 0 > /sys/kernel/debug/tracing/events/kprobes/enable
-        echo 0 > /sys/kernel/debug/tracing/options/stacktrace
-        echo > /sys/kernel/debug/tracing/kprobe_events
+        echo -n 0 > /sys/kernel/debug/tracing/events/kprobes/enable
+        echo -n 0 > /sys/kernel/debug/tracing/options/stacktrace
+        echo -n > /sys/kernel/debug/tracing/kprobe_events
         echo "Done. ($OUT_FILE)"
 
     # Invalid

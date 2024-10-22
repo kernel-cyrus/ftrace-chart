@@ -4,16 +4,18 @@ import json
 import hashlib
 
 def get_row(line):
-    if len(line) <= 3 or line[3] != ')':
+    parts = line.split('|')
+    if len(parts) != 2:
         return None
-    cpu = int(line[0:3])
-    line = line[21:].replace(';', '').replace('{', '').replace('}', '').rstrip()
-    if not line:
+    cpu = int(parts[0].split(')')[0])
+    content = parts[1]
+    content = content.replace(';', '').replace('{', '').replace('}', '').rstrip()
+    if not content:
         return None
-    if line[-2:] != '()':
+    if content[-2:] != '()':
         return None
-    depth = line.count('  ')
-    func = line.replace('()', '').strip()
+    depth = content.count('  ') - 1
+    func = content.replace('()', '').strip()
     row = {
         'cpu': cpu,
         'func': func,
