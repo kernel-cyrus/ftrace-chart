@@ -31,10 +31,10 @@ Trace Mode Example
   1. Record function-graph trace of schedule()
   $ ./ftrace-chart.sh record --mode=trace --function=schedule --timeout=10
 
-  2. Generate plantuml(.puml) files of the trace
+  2. Generate plantuml files
   $ ./ftrace-chart.sh report --mode=trace
 
-  3. Generate plantuml svg image
+  3. Generate svg image
   $ java -jar thirdparty/plantuml/plantuml-mit.jar -tsvg ./ftrace-chart.data/schedule*.puml
 
 Stack Mode Example
@@ -44,7 +44,7 @@ Stack Mode Example
   1. Record stacktrace of schedule()
   $ ./ftrace-chart.sh record --mode=stack --function=schedule --timeout=10
 
-  2. Generate plantuml(.puml) and svg files of the trace"
+  2. Generate plantuml files and svg image"
   $ ./ftrace-chart.sh report --mode=stack
 
 Flame Mode Example
@@ -54,7 +54,7 @@ Flame Mode Example
   1. Record perf data of schedule()
   $ ./ftrace-chart.sh record --mode=flame --function=schedule --timeout=10
 
-  2. Generate flamechart image
+  2. Generate flamechart svg image
   $ ./ftrace-chart.sh report --mode=flame
 
 ```
