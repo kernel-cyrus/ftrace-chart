@@ -31,14 +31,13 @@ def create_pattern_puml(puml_path, pattern):
             file.write(line)
         file.write('@endmindmap\n')
 
-def create_pattern_svg(puml_path):
-    os.system('java -jar thirdparty/plantuml/plantuml-mit.jar -tsvg %s' % puml_path)
-
 def get_pattern_md5(pattern):
 
     content = str([[x['depth'], x['func']] for x in pattern['rows']])
     return hashlib.md5(content.encode()).hexdigest()
 
+def create_svg(puml_path):
+    os.system('java -jar thirdparty/plantuml/plantuml-mit.jar -tsvg %s' % puml_path)
 
 def merge_stack(stackmap, pending):
     level = stackmap
@@ -64,17 +63,20 @@ def create_stackmap_puml(puml_path, stackmap):
 
 def main():
 
-    if len(sys.argv) < 4:
+    if len(sys.argv) < 3 or sys.argv[1] != 'report':
         print('ERROR: Wrong command format.')
-        print('/ftrace-chart.sh report --mode=[trace|stack|flame] <trace file>)')
+        print('/ftrace-chart.sh report --mode=[trace|stack|flame] <input_file>')
         sys.exit(1)
 
     mode = sys.argv[2].split('=')[1]
 
-    file_path = os.path.abspath(sys.argv[3])
+    if len(sys.argv) < 4:
+        file_path = './result/' + mode + '.data'
+    else:
+        file_path = os.path.abspath(sys.argv[3])
 
     if not os.path.isfile(file_path):
-        print('ERROR: Input trace file not found. %s' % file_path)
+        print('ERROR: Input trace file not found: %s' % file_path)
         sys.exit(1)
 
     folder_path = os.path.dirname(file_path)
@@ -109,7 +111,9 @@ def main():
         print('To generate a svg chart image:')
         print('> java -jar thirdparty/plantuml/plantuml-mit.jar -tsvg xxx.puml')
         print('------------------------')
-        print('Success, %d puml files generated.' % puml_count)
+        print('%d puml files generated.' % puml_count)
+        print('Done.')
+
     elif mode == 'stack':
         print('Parsing trace file...')
         stackmap = dict()
@@ -138,17 +142,19 @@ def main():
         func = list(stackmap.keys())[0]
         puml_path = folder_path + '/' + func + '.puml'
         create_stackmap_puml(puml_path, stackmap)
-        print('------------------------')
-        print('To generate a svg chart image:')
-        print('> java -jar thirdparty/plantuml/plantuml-mit.jar -tsvg xxx.puml')
-        print('------------------------')
-        print('Success. (%s)' % puml_path)
+        create_svg(puml_path)
+        print('File generated: %s|.svg' % puml_path)
+        print('Done.')
+
     elif mode == 'flame':
-        print('Parsing record file...')
+        print('Parsing trace file...')
         os.system('perf script -i %s > %s/flame.script' % (file_path, folder_path))
         os.system('./thirdparty/flamegraph/stackcollapse-perf.pl %s/flame.script > %s/flame.folded' % (folder_path, folder_path))
         os.system('./thirdparty/flamegraph/flamegraph.pl %s/flame.folded --reverse > %s/flame.svg' % (folder_path, folder_path))
-        print('Success. (%s/flame.svg)' % folder_path)
+        os.system('rm flame.script flame.folded')
+        print('File generated: %s/flame.svg' % folder_path)
+        print('Done.')
+
     else:
         print('ERROR: Invalid report mode: --mode=[trace|stack|flame]')
         sys.exit(1)

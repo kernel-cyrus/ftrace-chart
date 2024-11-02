@@ -22,7 +22,7 @@ Options
                               "flame" is flamegraph chart (where and times the function has been called)"
   -f, --function              Function to track
   -t, --timeout               Seconds to trace, you can stop mannully without passing this param.
-  -o, --outdir                Directory to save trace data and chart files.
+  -o, --output                Output trace file (default: result/*.data).
 
 Trace Mode Example
 ---------------------
@@ -32,10 +32,10 @@ Trace Mode Example
   $ ./ftrace-chart.sh record --mode=trace --function=schedule --timeout=10
 
   2. Generate plantuml(.puml) files of the trace
-  $ ./ftrace-chart.sh report --mode=trace ./ftrace-chart.data/trace.txt
+  $ ./ftrace-chart.sh report --mode=trace
 
   3. Generate plantuml svg image
-  $ java -jar plantuml-mit.jar -tsvg ./ftrace-chart.data/schedule~1.puml
+  $ java -jar thirdparty/plantuml/plantuml-mit.jar -tsvg ./ftrace-chart.data/schedule*.puml
 
 Stack Mode Example
 ---------------------
@@ -44,11 +44,8 @@ Stack Mode Example
   1. Record stacktrace of schedule()
   $ ./ftrace-chart.sh record --mode=stack --function=schedule --timeout=10
 
-  2. Generate plantuml(.puml) files of the trace
-  $ ./ftrace-chart.sh report --mode=stack ./ftrace-chart.data/trace.txt
-
-  3. Generate plantuml svg image
-  $ java -jar plantuml-mit.jar -tsvg ./ftrace-chart.data/schedule.puml
+  2. Generate plantuml(.puml) and svg files of the trace"
+  $ ./ftrace-chart.sh report --mode=stack
 
 Flame Mode Example
 ---------------------
@@ -58,7 +55,7 @@ Flame Mode Example
   $ ./ftrace-chart.sh record --mode=flame --function=schedule --timeout=10
 
   2. Generate flamechart image
-  $ ./ftrace-chart.sh report --mode=flame ./ftrace-chart.data/trace.txt
+  $ ./ftrace-chart.sh report --mode=flame
 
 ```
 
@@ -73,3 +70,9 @@ Chart of schedule() excution flow
 Chart of schedule() called position
 
 ![screenshot/schedule_stack.svg](screenshot/schedule_stack.svg)
+
+### Flame Mode
+
+Flamegraph of schedule() being called
+
+![screenshot/schedule_flame.svg](screenshot/schedule_flame.svg)
