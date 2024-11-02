@@ -32,7 +32,7 @@ def create_pattern_puml(puml_path, pattern):
         file.write('@endmindmap\n')
 
 def create_pattern_svg(puml_path):
-    os.system('java -jar plantuml-mit.jar -tsvg %s' % puml_path)
+    os.system('java -jar thirdparty/plantuml/plantuml-mit.jar -tsvg %s' % puml_path)
 
 def get_pattern_md5(pattern):
 
@@ -66,7 +66,7 @@ def main():
 
     if len(sys.argv) < 4:
         print('ERROR: Wrong command format.')
-        print('/ftrace-chart.sh report --mode=[trace|stack] <trace file>)')
+        print('/ftrace-chart.sh report --mode=[trace|stack|flame] <trace file>)')
         sys.exit(1)
 
     mode = sys.argv[2].split('=')[1]
@@ -107,7 +107,7 @@ def main():
                     pendings[cpu]['rows'].append(row)
         print('------------------------')
         print('To generate a svg chart image:')
-        print('> java -jar plantuml-mit.jar -tsvg xxx.puml')
+        print('> java -jar thirdparty/plantuml/plantuml-mit.jar -tsvg xxx.puml')
         print('------------------------')
         print('Success, %d puml files generated.' % puml_count)
     elif mode == 'stack':
@@ -140,11 +140,17 @@ def main():
         create_stackmap_puml(puml_path, stackmap)
         print('------------------------')
         print('To generate a svg chart image:')
-        print('> java -jar plantuml-mit.jar -tsvg xxx.puml')
+        print('> java -jar thirdparty/plantuml/plantuml-mit.jar -tsvg xxx.puml')
         print('------------------------')
         print('Success. (%s)' % puml_path)
+    elif mode == 'flame':
+        print('Parsing record file...')
+        os.system('perf script -i %s > %s/flame.script' % (file_path, folder_path))
+        os.system('./thirdparty/flamegraph/stackcollapse-perf.pl %s/flame.script > %s/flame.folded' % (folder_path, folder_path))
+        os.system('./thirdparty/flamegraph/flamegraph.pl %s/flame.folded --reverse > %s/flame.svg' % (folder_path, folder_path))
+        print('Success. (%s/flame.svg)' % folder_path)
     else:
-        print('ERROR: Invalid report mode: --mode=[trace|stack]')
+        print('ERROR: Invalid report mode: --mode=[trace|stack|flame]')
         sys.exit(1)
 
 if __name__ == '__main__':
