@@ -4,7 +4,7 @@ set -e
 start_trace() {
     _OUT_FILE=$1
     echo "Tracing start..."
-    echo -n 1 > /sys/kernel/debug/tracing/tracing_on
+    echo 1 > /sys/kernel/debug/tracing/tracing_on
     set +e
     if [ -z "$TIME" ]; then
         trap 'echo -n ""' SIGINT
@@ -15,7 +15,7 @@ start_trace() {
         timeout $TIME cat /sys/kernel/debug/tracing/trace_pipe > $_OUT_FILE
     fi
     set -e
-    echo -n 0 > /sys/kernel/debug/tracing/tracing_on
+    echo 0 > /sys/kernel/debug/tracing/tracing_on
     echo "Trace stop."
 }
 
@@ -141,15 +141,15 @@ elif [ "$1" == "record" ]; then
     if [ "$MODE" == "trace" ]; then
         
         echo "Setup ftrace..."
-        echo -n 0 > /sys/kernel/debug/tracing/tracing_on
-        echo -n function_graph > /sys/kernel/debug/tracing/current_tracer
-        echo -n > /sys/kernel/debug/tracing/trace
-        echo -n > /sys/kernel/debug/tracing/set_graph_function
-        echo -n "$FUNC" > /sys/kernel/debug/tracing/set_graph_function
+        echo 0 > /sys/kernel/debug/tracing/tracing_on
+        echo function_graph > /sys/kernel/debug/tracing/current_tracer
+        echo > /sys/kernel/debug/tracing/trace
+        echo > /sys/kernel/debug/tracing/set_graph_function
+        echo "$FUNC" > /sys/kernel/debug/tracing/set_graph_function
         start_trace $OUT_FILE
         echo "Reset ftrace..."
-        echo -n 0 > /sys/kernel/debug/tracing/tracing_on
-        echo -n > /sys/kernel/debug/tracing/set_graph_function
+        echo 0 > /sys/kernel/debug/tracing/tracing_on
+        echo > /sys/kernel/debug/tracing/set_graph_function
         echo "Trace file saved: $OUT_FILE"
         echo "Done."
 
@@ -157,21 +157,21 @@ elif [ "$1" == "record" ]; then
     elif [ "$MODE" == "stack" ]; then
 
         echo "Setup ftrace..."
-        echo -n 0 > /sys/kernel/debug/tracing/tracing_on
-        echo -n nop > /sys/kernel/debug/tracing/current_tracer
-        echo -n > /sys/kernel/debug/tracing/trace
+        echo 0 > /sys/kernel/debug/tracing/tracing_on
+        echo nop > /sys/kernel/debug/tracing/current_tracer
+        echo > /sys/kernel/debug/tracing/trace
         if [ -d "/sys/kernel/debug/tracing/events/kprobes" ]; then
-            echo -n 0 > /sys/kernel/debug/tracing/events/kprobes/enable
+            echo 0 > /sys/kernel/debug/tracing/events/kprobes/enable
         fi
         echo > /sys/kernel/debug/tracing/kprobe_events
-        echo -n "p:$FUNC $FUNC" > /sys/kernel/debug/tracing/kprobe_events
-        echo -n 1 > /sys/kernel/debug/tracing/events/kprobes/enable
-        echo -n 1 > /sys/kernel/debug/tracing/options/stacktrace
+        echo "p:$FUNC $FUNC" > /sys/kernel/debug/tracing/kprobe_events
+        echo 1 > /sys/kernel/debug/tracing/events/kprobes/enable
+        echo 1 > /sys/kernel/debug/tracing/options/stacktrace
         start_trace $OUT_FILE
         echo "Reset ftrace..."
-        echo -n 0 > /sys/kernel/debug/tracing/events/kprobes/enable
-        echo -n 0 > /sys/kernel/debug/tracing/options/stacktrace
-        echo -n > /sys/kernel/debug/tracing/kprobe_events
+        echo 0 > /sys/kernel/debug/tracing/events/kprobes/enable
+        echo 0 > /sys/kernel/debug/tracing/options/stacktrace
+        echo > /sys/kernel/debug/tracing/kprobe_events
         echo "Trace file saved: $OUT_FILE"
         echo "Done."
 
@@ -179,10 +179,10 @@ elif [ "$1" == "record" ]; then
     elif [ "$MODE" == "flame" ]; then
 
         echo "Setup ftrace..."
-        echo -n "p:$FUNC $FUNC" >> /sys/kernel/debug/tracing/kprobe_events
+        echo "p:$FUNC $FUNC" >> /sys/kernel/debug/tracing/kprobe_events
         start_perf $FUNC $OUT_FILE
         echo "Reset ftrace..."
-        echo -n "-:$FUNC" >> /sys/kernel/debug/tracing/kprobe_events
+        echo "-:$FUNC" >> /sys/kernel/debug/tracing/kprobe_events
         echo "Trace file saved: $OUT_FILE"
         echo "Done."
 

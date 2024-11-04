@@ -151,7 +151,7 @@ def main():
         os.system('perf script -i %s > %s/flame.script' % (file_path, folder_path))
         os.system('./thirdparty/flamegraph/stackcollapse-perf.pl %s/flame.script > %s/flame.folded' % (folder_path, folder_path))
         os.system('./thirdparty/flamegraph/flamegraph.pl %s/flame.folded --reverse > %s/flame.svg' % (folder_path, folder_path))
-        os.system('rm flame.script flame.folded')
+        os.system('rm %s/flame.script %s/flame.folded' % (folder_path, folder_path))
         print('File generated: %s/flame.svg' % folder_path)
         print('Done.')
 
