@@ -20,17 +20,17 @@ start_trace() {
 }
 
 start_perf() {
-    _FUNC=$1
+    _EVENT=$1
     _OUT_FILE=$2
     echo "Tracing start..."
     set +e
     if [ -z "$TIME" ]; then
         trap 'echo -n ""' SIGINT
         echo "Press CTRL+C to stop..."
-        perf record -e kprobes:$_FUNC -F 99 -a -g -o $_OUT_FILE
+        perf record -e $_EVENT -F 99 -a -g -o $_OUT_FILE
     else
         echo "Tracing for $TIME seconds..."
-        perf record -e kprobes:$_FUNC -F 99 -a -g -o $_OUT_FILE -- sleep $TIME
+        perf record -e $_EVENT -F 99 -a -g -o $_OUT_FILE -- sleep $TIME
     fi
     set -e
     echo "Trace stop."
@@ -80,6 +80,18 @@ if [ -z "$1" ] || [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
     echo "  2. Generate plantuml files and svg image"
     echo "  $ ./ftrace-chart.sh report --mode=stack"
     echo ""
+    echo "Flame Mode Example"
+    echo "---------------------"
+    echo "  Generate flame graph of an event or function:"
+    echo ""
+    echo "  1. Record perf data of an event or function"
+    echo "  $ ./ftrace-chart.sh record --mode=flame --timeout=10"
+    echo "  $ ./ftrace-chart.sh record --mode=flame --event=cache-misses --timeout=10"
+    echo "  $ ./ftrace-chart.sh record --mode=flame --function=schedule --timeout=10"
+    echo ""
+    echo "  2. Generate flamechart svg image"
+    echo "  $ ./ftrace-chart.sh report --mode=flame"
+    echo ""
     echo "Visit https://github.com/kernel-cyrus/ftrace-chart for more help."
     echo ""
 
@@ -98,6 +110,10 @@ elif [ "$1" == "record" ]; then
                 ;;
             -f=*|--function=*)
                 FUNC="${i#*=}"
+                shift # past argument=value
+                ;;
+            -e=*|--event=*)
+                EVENT="${i#*=}"
                 shift # past argument=value
                 ;;
             -t=*|--timeout=*)
@@ -120,11 +136,6 @@ elif [ "$1" == "record" ]; then
         echo "Please pass the record mode: --mode=[trace|stack|flame]"
         exit 0
     fi
-    
-    if [ -z "$FUNC" ]; then
-        echo "Please pass the record function: --function=<function_name>"
-        exit 0
-    fi
 
     if [ -z "$OUT_FILE" ]; then
         OUT_FILE="./result/$MODE.data"
@@ -139,7 +150,12 @@ elif [ "$1" == "record" ]; then
 
     # Record Trace Mode
     if [ "$MODE" == "trace" ]; then
-        
+
+        if [ -z "$FUNC" ]; then
+            echo "Please pass the record function: --function=<function_name>"
+            exit 0
+        fi
+
         echo "Setup ftrace..."
         echo 0 > /sys/kernel/debug/tracing/tracing_on
         echo function_graph > /sys/kernel/debug/tracing/current_tracer
@@ -155,6 +171,11 @@ elif [ "$1" == "record" ]; then
 
     # Record Stack Mode
     elif [ "$MODE" == "stack" ]; then
+
+        if [ -z "$FUNC" ]; then
+            echo "Please pass the record function: --function=<function_name>"
+            exit 0
+        fi
 
         echo "Setup ftrace..."
         echo 0 > /sys/kernel/debug/tracing/tracing_on
@@ -178,13 +199,23 @@ elif [ "$1" == "record" ]; then
     # Record Flame Mode
     elif [ "$MODE" == "flame" ]; then
 
-        echo "Setup ftrace..."
-        echo "p:$FUNC $FUNC" >> /sys/kernel/debug/tracing/kprobe_events
-        start_perf $FUNC $OUT_FILE
-        echo "Reset ftrace..."
-        echo "-:$FUNC" >> /sys/kernel/debug/tracing/kprobe_events
-        echo "Trace file saved: $OUT_FILE"
-        echo "Done."
+        if [ -z "$EVENT" ]; then
+            EVENT="cycles"
+        fi
+
+        if [ "$FUNC" ]; then
+            echo "Setup ftrace..."
+            echo "p:$FUNC $FUNC" >> /sys/kernel/debug/tracing/kprobe_events
+            start_perf kprobes:$FUNC $OUT_FILE
+            echo "Reset ftrace..."
+            echo "-:$FUNC" >> /sys/kernel/debug/tracing/kprobe_events
+            echo "Trace file saved: $OUT_FILE"
+            echo "Done."
+        elif [ "$EVENT" ]; then
+            start_perf $EVENT $OUT_FILE
+            echo "Trace file saved: $OUT_FILE"
+            echo "Done."
+        fi
 
     # Invalid
     else

@@ -21,6 +21,7 @@ Options
                               "stack" is stacktrace chart (where has the function been called)
                               "flame" is flamegraph chart (where and times the function has been called)"
   -f, --function              Function to track
+  -e, --event                 Event to track
   -t, --timeout               Seconds to trace, you can stop mannully without passing this param.
   -o, --output                Output trace file (default: result/*.data).
 
@@ -49,9 +50,9 @@ Stack Mode Example
 
 Flame Mode Example
 ---------------------
-  Generate flame chart of schedule() function:
-
-  1. Record perf data of schedule()
+  1. Generate flame graph:
+  $ ./ftrace-chart.sh record --mode=flame --timeout=10
+  $ ./ftrace-chart.sh record --mode=flame --event=cache-misses --timeout=10
   $ ./ftrace-chart.sh record --mode=flame --function=schedule --timeout=10
 
   2. Generate flamechart svg image
