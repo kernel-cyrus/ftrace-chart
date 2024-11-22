@@ -60,6 +60,14 @@ Flame Mode Example
 
 ```
 
+**Start local http server**
+
+```
+$ ./start-httpserver.sh
+```
+
+Then you can browse result files from a brower.
+
 ## Screen Shot
 
 ### Trace Mode
@@ -74,6 +82,10 @@ Chart of schedule() called position
 
 ### Flame Mode
 
-Flamegraph of schedule() being called
+Flamegraph
+
+![screenshot/flame.svg](screenshot/flame.svg)
+
+Reverse flamegraph of where schedule() is being called
 
 ![screenshot/schedule_flame.svg](screenshot/schedule_flame.svg)
