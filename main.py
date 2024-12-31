@@ -8,7 +8,7 @@ def get_proc(line):
     if len(parts) != 4:
         return None
     cpu = int(parts[0].split(')')[0])
-    curr = parts[1].split('-')
+    curr = parts[3].split('-')
     comm = curr[0]
     pid = curr[1]
     proc = {
@@ -98,6 +98,7 @@ def main():
 
     if mode == 'trace':
         print('Parsing trace file...')
+        currents = dict()
         pendings = dict()
         writtens = list()
         puml_count = 0
@@ -108,10 +109,10 @@ def main():
                     if not proc:
                         continue
                     cpu = proc['cpu']
-                    if cpu not in pendings:
-                        continue
-                    pendings[cpu]['pid'] = proc['pid']
-                    pendings[cpu]['comm'] = proc['comm']
+                    if cpu not in currents:
+                        currents[cpu] = dict()
+                    currents[cpu]['pid'] = proc['pid']
+                    currents[cpu]['comm'] = proc['comm']
                     continue
 
                 row = get_row(line)
@@ -119,16 +120,16 @@ def main():
                     continue
                 cpu = row['cpu']
                 if row['depth'] == 0:
-                    if cpu in pendings:
+                    if cpu in pendings and cpu in currents:
                         pattern = pendings[cpu]
                         md5 = get_pattern_md5(pattern)
                         if md5 not in writtens:
                             writtens.append(md5)
-                            puml_path = folder_path + '/' + pattern['func'] + '~' + str((len(writtens) - 1)) + (('_' + pattern['comm'] + '-' + pattern['pid']) if pattern['pid'] else '') + '.puml'
+                            puml_path = folder_path + '/' + pattern['func'] + '~' + str((len(writtens) - 1)) + '_' + currents[cpu]['comm'] + '-' + currents[cpu]['pid'] + '.puml'
                             create_pattern_puml(puml_path, pattern)
                             puml_count += 1
                         del pendings[cpu]
-                    pendings[cpu] = {'cpu': row['cpu'], 'func': row['func'], 'rows': [row], 'pid': '', 'comm': ''}
+                    pendings[cpu] = {'cpu': row['cpu'], 'func': row['func'], 'rows': [row]}
                 else:
                     if cpu not in pendings:
                         continue
