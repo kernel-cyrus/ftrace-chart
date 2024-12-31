@@ -23,14 +23,19 @@ start_perf() {
     _EVENT=$1
     _OUT_FILE=$2
     echo "Tracing start..."
+    if [ -z "$PID" ]; then
+        PID_STR=""
+    else
+	PID_STR="-t $PID"
+    fi
     set +e
     if [ -z "$TIME" ]; then
         trap 'echo -n ""' SIGINT
         echo "Press CTRL+C to stop..."
-        perf record -e $_EVENT -F 99 -a -g -o $_OUT_FILE
+        perf record -e $_EVENT $PID_STR -F 99 -a -g -o $_OUT_FILE
     else
         echo "Tracing for $TIME seconds..."
-        perf record -e $_EVENT -F 99 -a -g -o $_OUT_FILE -- sleep $TIME
+        perf record -e $_EVENT $PID_STR -F 99 -a -g -o $_OUT_FILE -- sleep $TIME
     fi
     set -e
     echo "Trace stop."
@@ -54,6 +59,7 @@ if [ -z "$1" ] || [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
     echo "                              \"stack\" is stacktrace chart (where has the function been called)"
     echo "                              \"flame\" is flamegraph chart (where and times the function has been called)"
     echo "  -f, --function              Function to track"
+    echo "  -p, --pid                   Process to track"
     echo "  -t, --timeout               Seconds to trace, you can stop mannully without passing this param."
     echo "  -o, --output                Output trace file (default: result/*.data)."
     echo ""
@@ -112,6 +118,10 @@ elif [ "$1" == "record" ]; then
                 FUNC="${i#*=}"
                 shift # past argument=value
                 ;;
+            -p=*|--pid=*)
+                PID="${i#*=}"
+                shift # past argument=value
+                ;;
             -e=*|--event=*)
                 EVENT="${i#*=}"
                 shift # past argument=value
@@ -163,10 +173,12 @@ elif [ "$1" == "record" ]; then
         echo > /sys/kernel/debug/tracing/set_graph_function
         echo "$FUNC" > /sys/kernel/debug/tracing/set_graph_function
         echo '8192' > /sys/kernel/debug/tracing/buffer_size_kb
+	echo $PID > /sys/kernel/debug/tracing/set_ftrace_pid
         start_trace $OUT_FILE
         echo "Reset ftrace..."
         echo 0 > /sys/kernel/debug/tracing/tracing_on
         echo > /sys/kernel/debug/tracing/set_graph_function
+	echo > /sys/kernel/debug/tracing/set_ftrace_pid
         echo "Trace file saved: $OUT_FILE"
         echo "Done."
 
@@ -189,11 +201,14 @@ elif [ "$1" == "record" ]; then
         echo "p:$FUNC $FUNC" > /sys/kernel/debug/tracing/kprobe_events
         echo 1 > /sys/kernel/debug/tracing/events/kprobes/enable
         echo 1 > /sys/kernel/debug/tracing/options/stacktrace
+        echo '8192' > /sys/kernel/debug/tracing/buffer_size_kb
+	echo $PID > /sys/kernel/debug/tracing/set_ftrace_pid
         start_trace $OUT_FILE
         echo "Reset ftrace..."
         echo 0 > /sys/kernel/debug/tracing/events/kprobes/enable
         echo 0 > /sys/kernel/debug/tracing/options/stacktrace
         echo > /sys/kernel/debug/tracing/kprobe_events
+	echo > /sys/kernel/debug/tracing/set_ftrace_pid
         echo "Trace file saved: $OUT_FILE"
         echo "Done."
 

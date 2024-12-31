@@ -114,18 +114,20 @@ def main():
                     currents[cpu]['pid'] = proc['pid']
                     currents[cpu]['comm'] = proc['comm']
                     continue
-
                 row = get_row(line)
                 if not row:
                     continue
                 cpu = row['cpu']
                 if row['depth'] == 0:
-                    if cpu in pendings and cpu in currents:
+                    if cpu in pendings:
                         pattern = pendings[cpu]
                         md5 = get_pattern_md5(pattern)
                         if md5 not in writtens:
                             writtens.append(md5)
-                            puml_path = folder_path + '/' + pattern['func'] + '~' + str((len(writtens) - 1)) + '_' + currents[cpu]['comm'] + '-' + currents[cpu]['pid'] + '.puml'
+                            if cpu in currents:
+                                puml_path = folder_path + '/' + pattern['func'] + '~' + str((len(writtens) - 1)) + '_' + currents[cpu]['comm'] + '-' + currents[cpu]['pid'] + '.puml'
+                            else:
+                                puml_path = folder_path + '/' + pattern['func'] + '~' + str((len(writtens) - 1)) + '.puml'
                             create_pattern_puml(puml_path, pattern)
                             puml_count += 1
                         del pendings[cpu]
@@ -134,6 +136,16 @@ def main():
                     if cpu not in pendings:
                         continue
                     pendings[cpu]['rows'].append(row)
+            for pattern in pendings.values():
+                md5 = get_pattern_md5(pattern)
+                if md5 not in writtens:
+                    writtens.append(md5)
+                    if cpu in currents:
+                        puml_path = folder_path + '/' + pattern['func'] + '~' + str((len(writtens) - 1)) + '_' + currents[cpu]['comm'] + '-' + currents[cpu]['pid'] + '.puml'
+                    else:
+                        puml_path = folder_path + '/' + pattern['func'] + '~' + str((len(writtens) - 1)) + '.puml'
+                    create_pattern_puml(puml_path, pattern)
+                    puml_count += 1
         print('------------------------')
         print('To generate a svg chart image:')
         print('> java -jar thirdparty/plantuml/plantuml-mit.jar -tsvg xxx.puml')
