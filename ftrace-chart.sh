@@ -174,11 +174,13 @@ elif [ "$1" == "record" ]; then
         echo "$FUNC" > /sys/kernel/debug/tracing/set_graph_function
         echo '8192' > /sys/kernel/debug/tracing/buffer_size_kb
 	echo $PID > /sys/kernel/debug/tracing/set_ftrace_pid
+	echo $PID > /sys/kernel/debug/tracing/set_event_pid
         start_trace $OUT_FILE
         echo "Reset ftrace..."
         echo 0 > /sys/kernel/debug/tracing/tracing_on
         echo > /sys/kernel/debug/tracing/set_graph_function
 	echo > /sys/kernel/debug/tracing/set_ftrace_pid
+	echo > /sys/kernel/debug/tracing/set_event_pid
         echo "Trace file saved: $OUT_FILE"
         echo "Done."
 
@@ -203,12 +205,14 @@ elif [ "$1" == "record" ]; then
         echo 1 > /sys/kernel/debug/tracing/options/stacktrace
         echo '8192' > /sys/kernel/debug/tracing/buffer_size_kb
 	echo $PID > /sys/kernel/debug/tracing/set_ftrace_pid
+	echo $PID > /sys/kernel/debug/tracing/set_event_pid
         start_trace $OUT_FILE
         echo "Reset ftrace..."
         echo 0 > /sys/kernel/debug/tracing/events/kprobes/enable
         echo 0 > /sys/kernel/debug/tracing/options/stacktrace
         echo > /sys/kernel/debug/tracing/kprobe_events
 	echo > /sys/kernel/debug/tracing/set_ftrace_pid
+	echo > /sys/kernel/debug/tracing/set_event_pid
         echo "Trace file saved: $OUT_FILE"
         echo "Done."
 
