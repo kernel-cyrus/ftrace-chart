@@ -60,6 +60,10 @@ def merge_stack(stackmap, pending):
         if func not in level:
             level[func] = dict()
         level = level[func]
+    if not level:
+        level['times:0'] = dict()
+    key, val = level.popitem()
+    level['times:' + str(int(key.split(':')[1])+1)] = dict()
 
 def create_stackmap_puml(puml_path, stackmap):
 
@@ -70,7 +74,10 @@ def create_stackmap_puml(puml_path, stackmap):
             cur_dict, cur_path = stack.pop()
             if cur_path:
                 func = str(cur_path[-1])
-                file.write((len(cur_path)) * '-' + ' ' + func + '()\n')
+                if 'times:' in func:
+                    file.write((len(cur_path)) * '-' + '[#lightgreen] ' + func.split(':')[1] + ' times\n')
+                else:
+                    file.write((len(cur_path)) * '-' + ' ' + func + '()\n')
             for key, val in reversed(cur_dict.items()):
                 path = cur_path + [key]
                 stack.append((val, path))
