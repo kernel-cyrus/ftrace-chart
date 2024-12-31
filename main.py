@@ -3,6 +3,21 @@ import os
 import json
 import hashlib
 
+def get_proc(line):
+    parts = line.split()
+    if len(parts) != 4:
+        return None
+    cpu = int(parts[0].split(')')[0])
+    curr = parts[1].split('-')
+    comm = curr[0]
+    pid = curr[1]
+    proc = {
+        'cpu': cpu,
+        'pid': pid,
+        'comm': comm
+    }
+    return proc
+
 def get_row(line):
     parts = line.split('|')
     if len(parts) != 2:
@@ -88,6 +103,17 @@ def main():
         puml_count = 0
         with open(file_path, 'r') as file:
             for line in file:
+                if '=>' in line:
+                    proc = get_proc(line)
+                    if not proc:
+                        continue
+                    cpu = proc['cpu']
+                    if cpu not in pendings:
+                        continue
+                    pendings[cpu]['pid'] = proc['pid']
+                    pendings[cpu]['comm'] = proc['comm']
+                    continue
+
                 row = get_row(line)
                 if not row:
                     continue
@@ -98,11 +124,11 @@ def main():
                         md5 = get_pattern_md5(pattern)
                         if md5 not in writtens:
                             writtens.append(md5)
-                            puml_path = folder_path + '/' + pattern['func'] + '~' + str((len(writtens) - 1)) + '.puml'
+                            puml_path = folder_path + '/' + pattern['func'] + '~' + str((len(writtens) - 1)) + (('_' + pattern['comm'] + '-' + pattern['pid']) if pattern['pid'] else '') + '.puml'
                             create_pattern_puml(puml_path, pattern)
                             puml_count += 1
                         del pendings[cpu]
-                    pendings[cpu] = {'cpu': row['cpu'], 'func': row['func'], 'rows': [row]}
+                    pendings[cpu] = {'cpu': row['cpu'], 'func': row['func'], 'rows': [row], 'pid': '', 'comm': ''}
                 else:
                     if cpu not in pendings:
                         continue

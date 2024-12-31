@@ -162,6 +162,7 @@ elif [ "$1" == "record" ]; then
         echo > /sys/kernel/debug/tracing/trace
         echo > /sys/kernel/debug/tracing/set_graph_function
         echo "$FUNC" > /sys/kernel/debug/tracing/set_graph_function
+        echo '8192' > /sys/kernel/debug/tracing/buffer_size_kb
         start_trace $OUT_FILE
         echo "Reset ftrace..."
         echo 0 > /sys/kernel/debug/tracing/tracing_on
