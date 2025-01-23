@@ -58,6 +58,7 @@ if [ -z "$1" ] || [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
     echo "                              \"trace\" is function-graph chart (excution flow of the function)"
     echo "                              \"stack\" is stacktrace chart (where has the function been called)"
     echo "                              \"flame\" is flamegraph chart (where and times the function has been called)"
+    echo "                              \"uftrace\" is uftrace to perfetto view (program excution flow)"
     echo "  -f, --function              Function to track"
     echo "  -p, --pid                   Process to track"
     echo "  -t, --timeout               Seconds to trace, you can stop mannully without passing this param."
@@ -134,6 +135,10 @@ elif [ "$1" == "record" ]; then
                 OUT_FILE="${i#*=}"
                 shift # past argument=value
                 ;;
+            -c=*|--cmd=*)
+                CMD="${i#*=}"
+                shift # past argument=value
+                ;;
             *)
                 echo "Invalid argument: ${i#*=}, please check your input."
                 exit 0
@@ -143,7 +148,7 @@ elif [ "$1" == "record" ]; then
 
     # Check arguments
     if [ -z "$MODE" ]; then
-        echo "Please pass the record mode: --mode=[trace|stack|flame]"
+        echo "Please pass the record mode: --mode=[trace|stack|flame|uftrace]"
         exit 0
     fi
 
@@ -237,9 +242,34 @@ elif [ "$1" == "record" ]; then
             echo "Done."
         fi
 
+    elif [ "$MODE" == "uftrace" ]; then
+
+	if ! type uftrace >/dev/null 2>&1; then
+            echo "Please install uftrace first."
+            exit 0
+	fi
+
+        if [ -z "$CMD" ]; then
+            echo "Please specify a program to run: --cmd=<program>"
+            exit 0
+        fi
+
+	PARAMS=""
+        if [ "$FUNC" ]; then
+            PARAMS+=" -F $FUNC"
+	fi
+
+	if [ "$EVENT" ]; then
+            PARAMS+=" -E $EVENT"
+	fi
+
+	uftrace record $PARAMS -k -K 50 -d $OUT_FILE $CMD
+        echo "Trace file saved: $OUT_FILE"
+        echo "Done."
+
     # Invalid
     else
-        echo "ERROR: Invalid record mode: --mode=[trace|stack|flame]"
+        echo "ERROR: Invalid record mode: --mode=[trace|stack|flame|uftrace]"
     fi
 
 # Other Modes

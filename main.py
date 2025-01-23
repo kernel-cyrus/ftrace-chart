@@ -87,7 +87,7 @@ def main():
 
     if len(sys.argv) < 3 or sys.argv[1] != 'report':
         print('ERROR: Wrong command format.')
-        print('/ftrace-chart.sh report --mode=[trace|stack|flame] <input_file>')
+        print('/ftrace-chart.sh report --mode=[trace|stack|flame|uftrace] <input_file>')
         sys.exit(1)
 
     mode = sys.argv[2].split('=')[1]
@@ -97,7 +97,7 @@ def main():
     else:
         file_path = os.path.abspath(sys.argv[3])
 
-    if not os.path.isfile(file_path):
+    if not os.path.exists(file_path):
         print('ERROR: Input trace file not found: %s' % file_path)
         sys.exit(1)
 
@@ -204,8 +204,17 @@ def main():
         print('%s/flame-reverse.svg' % folder_path)
         print('Done.')
 
+    elif mode == 'uftrace':
+        print('Parsing trace file...')
+        os.system('uftrace graph -d %s > %s/uftrace.txt' % (file_path, folder_path))
+        os.system('uftrace dump -d %s --chrome > %s/uftrace.json' % (file_path, folder_path))
+        print('File generated:')
+        print('%s/uftrace.txt' % folder_path)
+        print('%s/uftrace.json' % folder_path)
+        print('Done.')
+
     else:
-        print('ERROR: Invalid report mode: --mode=[trace|stack|flame]')
+        print('ERROR: Invalid report mode: --mode=[trace|stack|flame|uftrace]')
         sys.exit(1)
 
 if __name__ == '__main__':
