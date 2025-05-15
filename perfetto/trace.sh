@@ -1,1 +1,1 @@
-sudo tracebox -o trace_file.perfetto-trace --txt -c perfetto.config
+sudo ./tracebox -o perfetto.trace --txt -c perfetto.config
