@@ -1,4 +1,3 @@
 result/
-scripts/nohup.out
-scripts/perfetto.trace
-scripts/out
+scripts/out/*
+!scripts/out/.gitkeep

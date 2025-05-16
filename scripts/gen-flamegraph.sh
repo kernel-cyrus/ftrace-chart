@@ -29,12 +29,10 @@ echo $DATA_FILE
 echo $SCRIPT_FILE
 
 set -x
-mkdir out
 if [[ -z "$SCRIPT_FILE" ]]; then
     perf script -i $DATA_FILE -f > out/perf.script
     SCRIPT_FILE="perf.script"
 fi
-
 ../thirdparty/flamegraph/stackcollapse-perf.pl out/$SCRIPT_FILE > out/perf.script.folded
 ../thirdparty/flamegraph/flamegraph.pl out/perf.script.folded > out/flamegraph.svg
 ../thirdparty/flamegraph/flamegraph.pl out/perf.script.folded --reverse > out/flamegraph-reverse.svg
