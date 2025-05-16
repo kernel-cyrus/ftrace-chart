@@ -1,3 +1,4 @@
 result/
 scripts/nohup.out
 scripts/perfetto.trace
+scripts/out
